@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import bcrypt from 'bcrypt';
 import { query } from 'express-validator'; // To validate the answers
 import User from '../models/Users';
 import log4js from 'log4js';
@@ -26,7 +27,8 @@ class UserRoutes {
 	public async createUser(req: Request, res: Response): Promise<void> {
 		try {
 			const { nombre, email, password, username } = req.body;
-			const newUser = new User({ nombre, email, password, username });
+			const hashedPassword = await bcrypt.hash(password, 10);
+			const newUser = new User({ nombre, email, hashedPassword, username });
 			const user = await newUser.save();
 			res.json({data: user});
 		} catch (error) {
