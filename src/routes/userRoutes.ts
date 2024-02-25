@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { query } from 'express-validator';
+import { query } from 'express-validator'; // To validate the answers
 import User from '../models/Users';
 import log4js from 'log4js';
 const logger = log4js.getLogger();

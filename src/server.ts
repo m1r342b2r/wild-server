@@ -25,7 +25,7 @@ class Server {
 		this.routes();
 	}
 
-	// Este método será para configurar el servidor
+	// Server configurations
 	async config() {
 		// Connection to DB
 		const DBURI: string = (process.env.MONGODB_URL as string);
@@ -44,7 +44,7 @@ class Server {
 		this.app.use(query());
 	}
 
-	// Método para configurar las rutas
+	// Router files
 	routes() {
 		this.app.use(indexRoutes);
 		this.app.use('/api/posts', postRoutes);
