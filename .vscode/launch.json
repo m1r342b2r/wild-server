@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Server",
+            "runtimeVersion": "20.9.0",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["start"],
+            "type": "node",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
+        
+        
+    ]
+}
