@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import Post from '../models/Posts';
+import authModule from '../middlewares/authMiddleware';
 
 class PostRoutes {
 	router: Router;
@@ -52,11 +53,11 @@ class PostRoutes {
 	}
 
 	routes() {
-		this.router.get('/', this.getPosts);
-		this.router.get('/:url', this.getPost);
-		this.router.post('/', this.createPost);
-		this.router.put('/:url', this.updatePost);
-		this.router.delete('/:url', this.deletePost);
+		this.router.get('/', authModule.verifyToken, this.getPosts);
+		this.router.get('/:url', authModule.verifyToken, this.getPost);
+		this.router.post('/', authModule.verifyToken, this.createPost);
+		this.router.put('/:url', authModule.verifyToken, this.updatePost);
+		this.router.delete('/:url', authModule.verifyToken, this.deletePost);
 	}
 }
 

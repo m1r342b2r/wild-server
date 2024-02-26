@@ -13,6 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const log4js_1 = __importDefault(require("log4js"));
+const logger = log4js_1.default.getLogger();
+logger.level = "debug";
 class AuthVerify {
     constructor() { }
     createToken(userId) {
@@ -26,13 +29,18 @@ class AuthVerify {
         return __awaiter(this, void 0, void 0, function* () {
             const TOKEN = process.env.TOKEN;
             const token = req.header('Authorization');
-            if (!token)
+            if (!token) {
+                logger.debug(`ERROR: Access denied. Empty token.`);
                 res.status(401).send({ error: `Access denied` });
-            try {
-                const decoded = jsonwebtoken_1.default.verify(token || '', TOKEN);
             }
-            catch (error) {
-                res.status(401).json({ error: `Invalid token` });
+            else {
+                try {
+                    const decoded = jsonwebtoken_1.default.verify(token || '', TOKEN);
+                    res.status(200).json({ message: `Access granted.` });
+                }
+                catch (error) {
+                    res.status(401).json({ error: `Invalid token` });
+                }
             }
         });
     }

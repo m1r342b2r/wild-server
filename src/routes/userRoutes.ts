@@ -1,8 +1,8 @@
 import { Request, Response, Router } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../models/Users';
-import log4js from 'log4js';
 import authModule from '../middlewares/authMiddleware';
+import log4js from 'log4js';
 const logger = log4js.getLogger();
 logger.level = "debug";
 
@@ -71,7 +71,7 @@ class UserRoutes {
 			authModule.createToken(user._id)
 			.then((token) => res.status(200).json({token}))
 			.catch((error) => {
-				throw new Error(error);
+				logger.error(error);
 			});
 		} catch (error) {
 			res.status(401).send({message: error});
@@ -80,7 +80,7 @@ class UserRoutes {
 
 	routes() {
 		this.router.get('/', this.getUsers);
-		this.router.get('/:username', this.getUser);
+		this.router.get('/:username', authModule.verifyToken, this.getUser);
 		this.router.post('/signUp', this.signUp);
 		this.router.put('/:username', this.updateUser);
 		this.router.delete('/:username', this.deleteUser);

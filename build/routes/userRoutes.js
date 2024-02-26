@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const Users_1 = __importDefault(require("../models/Users"));
-const log4js_1 = __importDefault(require("log4js"));
 const authMiddleware_1 = __importDefault(require("../middlewares/authMiddleware"));
+const log4js_1 = __importDefault(require("log4js"));
 const logger = log4js_1.default.getLogger();
 logger.level = "debug";
 require('dotenv').config();
@@ -90,7 +90,7 @@ class UserRoutes {
                 authMiddleware_1.default.createToken(user._id)
                     .then((token) => res.status(200).json({ token }))
                     .catch((error) => {
-                    throw new Error(error);
+                    logger.error(error);
                 });
             }
             catch (error) {
@@ -100,7 +100,7 @@ class UserRoutes {
     }
     routes() {
         this.router.get('/', this.getUsers);
-        this.router.get('/:username', this.getUser);
+        this.router.get('/:username', authMiddleware_1.default.verifyToken, this.getUser);
         this.router.post('/signUp', this.signUp);
         this.router.put('/:username', this.updateUser);
         this.router.delete('/:username', this.deleteUser);

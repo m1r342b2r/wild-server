@@ -1,5 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
+import log4js from 'log4js';
+const logger = log4js.getLogger();
+logger.level = "debug";
 
 class AuthVerify {
 	constructor() {}
@@ -13,12 +16,16 @@ class AuthVerify {
 	public async verifyToken ( req: Request, res: Response ): Promise<void> {
 		const TOKEN: string = (process.env.TOKEN as string);
 		const token = req.header('Authorization');
-		if (!token) res.status(401).send({error: `Access denied`});
-
-		try {
-			const decoded = jwt.verify(token || '', TOKEN);
-		} catch (error) {
-			res.status(401).json({error: `Invalid token`});
+		if (!token) {
+			logger.debug(`ERROR: Access denied. Empty token.`)
+			res.status(401).send({error: `Access denied`})
+		} else {
+			try {
+				const decoded = jwt.verify(token || '', TOKEN);
+				res.status(200).json({message: `Access granted.`});
+			} catch (error) {
+				res.status(401).json({error: `Invalid token`});
+			}
 		}
 	}
 }
