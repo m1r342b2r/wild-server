@@ -99,11 +99,11 @@ class UserRoutes {
         });
     }
     routes() {
-        this.router.get('/', this.getUsers);
+        this.router.get('/', authMiddleware_1.default.verifyToken, this.getUsers);
         this.router.get('/:username', authMiddleware_1.default.verifyToken, this.getUser);
         this.router.post('/signUp', this.signUp);
-        this.router.put('/:username', this.updateUser);
-        this.router.delete('/:username', this.deleteUser);
+        this.router.put('/:username', authMiddleware_1.default.verifyToken, this.updateUser);
+        this.router.delete('/:username', authMiddleware_1.default.verifyToken, this.deleteUser);
         this.router.post('/signIn', this.signIn);
     }
 }

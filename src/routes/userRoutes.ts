@@ -79,11 +79,11 @@ class UserRoutes {
 	}
 
 	routes() {
-		this.router.get('/', this.getUsers);
+		this.router.get('/', authModule.verifyToken, this.getUsers);
 		this.router.get('/:username', authModule.verifyToken, this.getUser);
 		this.router.post('/signUp', this.signUp);
-		this.router.put('/:username', this.updateUser);
-		this.router.delete('/:username', this.deleteUser);
+		this.router.put('/:username', authModule.verifyToken, this.updateUser);
+		this.router.delete('/:username', authModule.verifyToken, this.deleteUser);
 		this.router.post('/signIn', this.signIn);
 	}
 }

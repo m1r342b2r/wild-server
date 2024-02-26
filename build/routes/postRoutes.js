@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Posts_1 = __importDefault(require("../models/Posts"));
+const authMiddleware_1 = __importDefault(require("../middlewares/authMiddleware"));
 class PostRoutes {
     constructor() {
         this.router = (0, express_1.Router)();
@@ -70,11 +71,11 @@ class PostRoutes {
         });
     }
     routes() {
-        this.router.get('/', this.getPosts);
-        this.router.get('/:url', this.getPost);
-        this.router.post('/', this.createPost);
-        this.router.put('/:url', this.updatePost);
-        this.router.delete('/:url', this.deletePost);
+        this.router.get('/', authMiddleware_1.default.verifyToken, this.getPosts);
+        this.router.get('/:url', authMiddleware_1.default.verifyToken, this.getPost);
+        this.router.post('/', authMiddleware_1.default.verifyToken, this.createPost);
+        this.router.put('/:url', authMiddleware_1.default.verifyToken, this.updatePost);
+        this.router.delete('/:url', authMiddleware_1.default.verifyToken, this.deletePost);
     }
 }
 const postRoutes = new PostRoutes();
