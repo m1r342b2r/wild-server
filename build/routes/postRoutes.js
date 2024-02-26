@@ -41,22 +41,32 @@ class PostRoutes {
                 res.json({ data: newPost });
             }
             catch (error) {
-                res.status(400).send({ error: `Error: ${error}` });
+                res.status(404).send({ error: `Error: ${error}` });
             }
         });
     }
     updatePost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { url } = req.params;
-            const post = yield Posts_1.default.findOneAndUpdate({ url }, req.body, { new: true });
-            res.json(post);
+            try {
+                const { url } = req.params;
+                const post = yield Posts_1.default.findOneAndUpdate({ url }, req.body, { new: true });
+                res.json(post);
+            }
+            catch (error) {
+                res.status(404).send({ message: `Error: ${error}` });
+            }
         });
     }
     deletePost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { url } = req.params;
-            yield Posts_1.default.findOneAndDelete({ url });
-            res.json({ message: 'Post deleted succeddfully' });
+            try {
+                const { url } = req.params;
+                yield Posts_1.default.findOneAndDelete({ url });
+                res.json({ message: 'Post deleted succeddfully' });
+            }
+            catch (error) {
+                res.status(404).send({ message: `Error: ${error}` });
+            }
         });
     }
     routes() {

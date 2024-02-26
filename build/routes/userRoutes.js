@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Users_1 = __importDefault(require("../models/Users"));
 const log4js_1 = __importDefault(require("log4js"));
 const logger = log4js_1.default.getLogger();
@@ -24,36 +26,72 @@ class UserRoutes {
     }
     getUsers(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield Users_1.default.find();
+            const users = yield Users_1.default.find({}, { password: 0 });
             res.json(users);
         });
     }
     getUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield Users_1.default.findOne({ username: req.params.username }).populate('posts', 'title url -_id');
+            const user = yield Users_1.default.findOne({ username: req.params.username }, { password: 0 }).populate('posts', 'title url -_id');
             res.json(user);
         });
     }
     createUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { nombre, email, password, username } = req.body;
-            const newUser = new Users_1.default({ nombre, email, password, username });
-            const user = yield newUser.save();
-            res.json({ data: user });
+            try {
+                const { nombre, email, password, username } = req.body;
+                const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+                const newUser = new Users_1.default({ nombre, email, password: hashedPassword, username });
+                const user = yield newUser.save();
+                res.json({ message: 'User created' });
+            }
+            catch (error) {
+                res.status(404).send({ message: `Error: ${error}` });
+            }
         });
     }
     updateUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { username } = req.params;
-            const user = yield Users_1.default.findOneAndUpdate({ username }, req.body, { new: true });
-            res.json(user);
+            try {
+                const { username } = req.params;
+                const user = yield Users_1.default.findOneAndUpdate({ username }, req.body, { new: true });
+                res.json(user);
+            }
+            catch (error) {
+                res.status(404).send({ message: `Error: ${error}` });
+            }
         });
     }
     deleteUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { username } = req.params;
-            yield Users_1.default.findOneAndDelete({ username });
-            res.json({ message: 'User deleted succeddfully' });
+            try {
+                const { username } = req.params;
+                yield Users_1.default.findOneAndDelete({ username });
+                res.json({ message: 'User deleted succeddfully' });
+            }
+            catch (error) {
+                res.status(404).send({ message: `Error: ${error}` });
+            }
+        });
+    }
+    login(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const authMsgError = `Authentication failed`;
+                const { username, password } = req.body;
+                const user = yield Users_1.default.findOne({ username });
+                if (!user)
+                    throw new Error(authMsgError);
+                const userpass = user.password || '';
+                const passwordMatch = yield bcrypt_1.default.compare(password, userpass);
+                if (!passwordMatch)
+                    throw new Error(authMsgError);
+                const token = jsonwebtoken_1.default.sign({ userId: user._id }, 'laconchadetumadre', { expiresIn: '1h' });
+                res.status(200).json({ token });
+            }
+            catch (error) {
+                res.status(401).send({ message: error });
+            }
         });
     }
     routes() {
@@ -62,6 +100,7 @@ class UserRoutes {
         this.router.post('/', this.createUser);
         this.router.put('/:username', this.updateUser);
         this.router.delete('/:username', this.deleteUser);
+        this.router.post('/login', this.login);
     }
 }
 const userRoutes = new UserRoutes();

@@ -32,7 +32,7 @@ class Server {
         this.config();
         this.routes();
     }
-    // Este método será para configurar el servidor
+    // Server configurations
     config() {
         return __awaiter(this, void 0, void 0, function* () {
             // Connection to DB
@@ -51,7 +51,7 @@ class Server {
             this.app.use((0, express_validator_1.query)());
         });
     }
-    // Método para configurar las rutas
+    // Router files
     routes() {
         this.app.use(indexRoutes_1.default);
         this.app.use('/api/posts', postRoutes_1.default);
