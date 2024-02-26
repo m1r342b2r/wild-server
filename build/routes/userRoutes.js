@@ -14,11 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Users_1 = __importDefault(require("../models/Users"));
 const log4js_1 = __importDefault(require("log4js"));
+const authMiddleware_1 = __importDefault(require("../middlewares/authMiddleware"));
 const logger = log4js_1.default.getLogger();
 logger.level = "debug";
+require('dotenv').config();
 class UserRoutes {
     constructor() {
         this.router = (0, express_1.Router)();
@@ -36,7 +37,7 @@ class UserRoutes {
             res.json(user);
         });
     }
-    createUser(req, res) {
+    signUp(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { nombre, email, password, username } = req.body;
@@ -74,7 +75,7 @@ class UserRoutes {
             }
         });
     }
-    login(req, res) {
+    signIn(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authMsgError = `Authentication failed`;
@@ -86,8 +87,11 @@ class UserRoutes {
                 const passwordMatch = yield bcrypt_1.default.compare(password, userpass);
                 if (!passwordMatch)
                     throw new Error(authMsgError);
-                const token = jsonwebtoken_1.default.sign({ userId: user._id }, 'laconchadetumadre', { expiresIn: '1h' });
-                res.status(200).json({ token });
+                authMiddleware_1.default.createToken(user._id)
+                    .then((token) => res.status(200).json({ token }))
+                    .catch((error) => {
+                    throw new Error(error);
+                });
             }
             catch (error) {
                 res.status(401).send({ message: error });
@@ -97,10 +101,10 @@ class UserRoutes {
     routes() {
         this.router.get('/', this.getUsers);
         this.router.get('/:username', this.getUser);
-        this.router.post('/', this.createUser);
+        this.router.post('/signUp', this.signUp);
         this.router.put('/:username', this.updateUser);
         this.router.delete('/:username', this.deleteUser);
-        this.router.post('/login', this.login);
+        this.router.post('/signIn', this.signIn);
     }
 }
 const userRoutes = new UserRoutes();

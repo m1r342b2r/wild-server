@@ -1,10 +1,8 @@
 import { Request, Response, Router } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { Result, query } from 'express-validator'; // To validate the answers
-const protectedRoutes = require('../middlewares/authMiddleware');
 import User from '../models/Users';
 import log4js from 'log4js';
+import authModule from '../middlewares/authMiddleware';
 const logger = log4js.getLogger();
 logger.level = "debug";
 
@@ -63,15 +61,18 @@ class UserRoutes {
 	public async signIn(req: Request, res: Response): Promise<void> {
 		try {
 			const authMsgError = `Authentication failed`;
-			const TOKEN: string = (process.env.TOKEN as string);
 			const { username, password } = req.body;
 			const user = await User.findOne({username});
 			if (!user) throw new Error(authMsgError);
 			const userpass = user.password || '';
 			const passwordMatch = await bcrypt.compare(password, userpass);
 			if (!passwordMatch) throw new Error(authMsgError);
-			const token = jwt.sign({ userId: user._id }, TOKEN, { expiresIn: '1h' });
-			res.status(200).json({token})
+
+			authModule.createToken(user._id)
+			.then((token) => res.status(200).json({token}))
+			.catch((error) => {
+				throw new Error(error);
+			});
 		} catch (error) {
 			res.status(401).send({message: error});
 		}

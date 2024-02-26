@@ -3,6 +3,12 @@ import { Request, Response } from 'express';
 
 class AuthVerify {
 	constructor() {}
+
+	public async createToken ( userId: Object ): Promise<String> {
+		const TOKEN: string = (process.env.TOKEN as string);
+		const token = jwt.sign({ userId: userId }, TOKEN, { expiresIn: '1h' });
+		return token;
+	}
 	
 	public async verifyToken ( req: Request, res: Response ): Promise<void> {
 		const TOKEN: string = (process.env.TOKEN as string);
