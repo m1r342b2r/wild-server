@@ -12,5 +12,5 @@ npm start
 ```
 ### If you wich start the server in develop mode execute the command:
 ```
-npm dev
+npm ts
 ```
